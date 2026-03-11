@@ -5,6 +5,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 df = pd.read_csv("titanic.csv")
@@ -38,6 +39,7 @@ preprocess = ColumnTransformer(
     remainder="drop"
 )
 
+# LogisticRegression
 model = LogisticRegression(max_iter=2000)
 
 clf = Pipeline(steps=[("preprocess", preprocess),
@@ -46,4 +48,23 @@ clf = Pipeline(steps=[("preprocess", preprocess),
 cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=101)
 
 scores = cross_val_score(clf, X, y, cv=cv, scoring="roc_auc")
-print("ROC AUC CV:", scores.mean(), "+/-", scores.std())
+print("LogisticRegression ROC AUC CV:", scores.mean(), "+/-", scores.std())
+
+# RandomForest
+model = RandomForestClassifier(
+    n_estimators=300,
+    max_depth=None,
+    min_samples_split=5,
+    random_state=101
+)
+
+clf = Pipeline(steps=[
+    ("preprocess", preprocess),
+    ("model", model)
+])
+
+cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=101)
+
+scores = cross_val_score(clf, X, y, cv=cv, scoring="roc_auc")
+
+print("RandomForest ROC AUC CV:", scores.mean(), "+/-", scores.std())
